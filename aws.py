@@ -1,14 +1,14 @@
-import sys
 from tcping import Ping
+import sys
 import os
 import time
 
 
-region = "ap-southeast-1" # Your region
-awsName = "awsName" # Your aws name
-ipName = "ipName" # Your static ip name
-serverName = "serverName" # Your server name
-port = 443 # Your server port
+region = "ap-southeast-1"  # Your region
+awsName = "awsName"  # Your aws name
+ipName = "ipName"  # Your static ip name
+serverName = "serverName"  # Your server name
+port = 443  # Your server port
 
 
 class HiddenPrints:
@@ -66,11 +66,10 @@ if __name__ == "__main__":
         if check_gfw(serverName, port):
             print("aws is ok")
         else:
-            print("aws is not ok, changing ip")
+            print("aws is not ok, changing ip...")
             try:
                 ip, newIp = change_ip()
                 print("ip changed from "+ip+" to "+newIp)
             except Exception as e:
-                print(e)
-                print("\nchange ip failed")
+                print(e+"\nchange ip failed")
         time.sleep(600)
