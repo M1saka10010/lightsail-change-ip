@@ -3,9 +3,12 @@ from tcping import Ping
 import os
 import time
 
+
 region = "ap-southeast-1" # Your region
 awsName = "awsName" # Your aws name
 ipName = "ipName" # Your static ip name
+serverName = "serverName" # Your server name
+port = 443 # Your server port
 
 
 class HiddenPrints:
@@ -60,7 +63,7 @@ def change_ip():
 
 if __name__ == "__main__":
     while(1):
-        if check_gfw("sg.lli.cx", 443):
+        if check_gfw(serverName, port):
             print("aws is ok")
         else:
             print("aws is not ok, changing ip")

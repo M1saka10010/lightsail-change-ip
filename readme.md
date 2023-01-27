@@ -29,6 +29,8 @@ Running this script requires a server located in mainland China. This script is 
 region = "ap-southeast-1" # Your region
 awsName = "awsName" # Your aws name
 ipName = "ipName" # Your static ip name
+serverName = "serverName" # Your server name
+port = 443 # Your server port
 ```
 
 6. Run the script
