@@ -26,11 +26,16 @@ Running this script requires a server located in mainland China. This script is 
 
 ```python
 # aws.py
-region = "ap-southeast-1" # Your region
-awsName = "awsName" # Your aws name
-ipName = "ipName" # Your static ip name
-serverName = "serverName" # Your server name
-port = 443 # Your server port
+region = "ap-southeast-1"  # Your region
+awsName = "awsName"  # Your aws name
+ipName = "ipName"  # Your static ip name
+serverDomain = "serverDomain"  # The Domain of your server
+port = 443  # Your server port
+notifyOn = True  # Whether to notify you when ip changed
+telegramBotKey = "telegramBotKey"  # Your telegram bot key
+telegramChatId = "telegramChatId"  # Your telegram chat id
+# Telegram bot api(you may proxy it if you are in China)
+telegramBotApi = "https://api.telegram.org"
 ```
 
 6. Run the script
