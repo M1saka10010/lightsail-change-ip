@@ -1,14 +1,20 @@
-from tcping import Ping
-import sys
 import os
+import sys
 import time
+import requests
 
+from tcping import Ping
 
 region = "ap-southeast-1"  # Your region
 awsName = "awsName"  # Your aws name
 ipName = "ipName"  # Your static ip name
-serverName = "serverName"  # Your server name
+serverDomain = "serverDomain"  # The Domain of your server
 port = 443  # Your server port
+notifyOn = True  # Whether to notify you when ip changed
+telegramBotKey = "telegramBotKey"  # Your telegram bot key
+telegramChatId = "telegramChatId"  # Your telegram chat id
+# Telegram bot api(you may proxy it if you are in China)
+telegramBotApi = "https://api.telegram.org"
 
 
 class HiddenPrints:
@@ -21,8 +27,8 @@ class HiddenPrints:
         sys.stdout = self._original_stdout
 
 
-def check_gfw(serverName, port):
-    ping = Ping(serverName, port, 1)
+def check_gfw(serverDomain, port):
+    ping = Ping(serverDomain, port, 1)
     with HiddenPrints():
         ping.ping(4)
     rate = Ping._success_rate(ping)
@@ -61,15 +67,39 @@ def change_ip():
     return ip, newIp
 
 
+def get(url):
+    try:
+        r = requests.get(url, timeout=2)
+        return r.text
+    except Exception as e:
+        return e
+
+
+def notify_ip_changed(ip, newIp):
+    if notifyOn:
+        res = get(telegramBotApi+"/bot"+telegramBotKey+"/sendMessage?chat_id="+telegramChatId +
+                  "&text=ip changed from "+ip+" to "+newIp)
+        return res
+
+
+def notify_ip_changed_failed(err):
+    if notifyOn:
+        res = get(telegramBotApi+"/bot"+telegramBotKey+"/sendMessage?chat_id="+telegramChatId +
+                  "&text=ip changed failed\n"+err)
+        return res
+
+
 if __name__ == "__main__":
-    while(1):
-        if check_gfw(serverName, port):
+    while (1):
+        if check_gfw(serverDomain, port):
             print("aws is ok")
         else:
             print("aws is not ok, changing ip...")
             try:
                 ip, newIp = change_ip()
                 print("ip changed from "+ip+" to "+newIp)
+                notify_ip_changed(ip, newIp)
             except Exception as e:
                 print(e+"\nchange ip failed")
+                notify_ip_changed_failed()
         time.sleep(600)
