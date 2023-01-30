@@ -27,13 +27,16 @@ class HiddenPrints:
         sys.stdout = self._original_stdout
 
 
-def check_gfw(serverDomain, port):
-    ping = Ping(serverDomain, port, 1)
-    with HiddenPrints():
-        ping.ping(4)
+def check_gfw(serverName, port):
+    ping = Ping(serverName, port, 1)
+    try:
+        with HiddenPrints():
+            ping.ping(4)
+    except Exception as e:
+        print(str(e)+"\nplease check your server name and port")
     rate = Ping._success_rate(ping)
     # 根据丢包率判断是否被墙
-    if rate != 0.0:
+    if float(rate) > 0:
         return True
     return False
 
@@ -100,6 +103,6 @@ if __name__ == "__main__":
                 print("ip changed from "+ip+" to "+newIp)
                 notify_ip_changed(ip, newIp)
             except Exception as e:
-                print(e+"\nchange ip failed")
+                print(str(e)+"\nchange ip failed")
                 notify_ip_changed_failed()
         time.sleep(600)
