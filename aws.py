@@ -6,7 +6,8 @@ import requests
 from tcping import Ping
 
 region = "ap-southeast-1"  # Your region
-awsName = "awsName"  # Your aws name
+# Your aws name (not username, it's the name of your lightsail instance)
+awsName = "awsName"
 ipName = "ipName"  # Your static ip name
 serverDomain = "serverDomain"  # The Domain of your server
 port = 443  # Your server port
