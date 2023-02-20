@@ -8,8 +8,8 @@ from tcping import Ping
 region = "ap-southeast-1"  # Your region
 awsName = "awsName"  # Your aws name
 ipName = "ipName"  # Your static ip name
-serverDomain = "serverDomain"  # The Domain of your server
 port = 443  # Your server port
+roundTime = 600  # Check interval
 notifyOn = True  # Whether to notify you when ip changed
 telegramBotKey = "telegramBotKey"  # Your telegram bot key
 telegramChatId = "telegramChatId"  # Your telegram chat id
@@ -27,8 +27,8 @@ class HiddenPrints:
         sys.stdout = self._original_stdout
 
 
-def check_gfw(serverDomain, port):
-    ping = Ping(serverDomain, port, 1)
+def check_gfw(serverIp, port):
+    ping = Ping(serverIp, port, 1)
     with HiddenPrints():
         ping.ping(4)
     rate = Ping._success_rate(ping)
@@ -36,6 +36,18 @@ def check_gfw(serverDomain, port):
     if rate != 0.0:
         return True
     return False
+
+
+# 用aws静态ip名称获取ip
+def get_ip(ipName):
+    try:
+        sh = os.popen("aws lightsail --region "+region +
+                    " get-static-ip --static-ip-name "+ipName)
+        ip = sh.read().split("ipAddress")[1].split('"')[2]
+        return ip
+    except Exception as e:
+        print(e)
+        return False
 
 
 def os_cmd(cmd):
@@ -91,7 +103,12 @@ def notify_ip_changed_failed(err):
 
 if __name__ == "__main__":
     while (1):
-        if check_gfw(serverDomain, port):
+        ip = get_ip(ipName)
+        if not ip:
+            print("get ip failed")
+            time.sleep(roundTime)
+            continue
+        if check_gfw(ip, port):
             print("aws is ok")
         else:
             print("aws is not ok, changing ip...")
@@ -102,4 +119,4 @@ if __name__ == "__main__":
             except Exception as e:
                 print(e+"\nchange ip failed")
                 notify_ip_changed_failed()
-        time.sleep(600)
+        time.sleep(roundTime)
