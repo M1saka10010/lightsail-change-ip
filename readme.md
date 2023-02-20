@@ -27,7 +27,8 @@ Running this script requires a server located in mainland China. This script is 
 ```python
 # aws.py
 region = "ap-southeast-1"  # Your region
-awsName = "awsName"  # Your aws name
+# Your aws name (not username, it's the name of your lightsail instance)
+awsName = "awsName"
 ipName = "ipName"  # Your static ip name
 port = 443  # Your server port
 roundTime = 600  # Check interval
