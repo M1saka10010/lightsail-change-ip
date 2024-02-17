@@ -1,9 +1,8 @@
+# -*- coding: utf-8 -*-
 import os
-import sys
+import socket
 import time
 import requests
-
-from tcping import Ping
 
 region = "ap-southeast-1"  # Your region
 # Your aws name (not username, it's the name of your lightsail instance)
@@ -18,28 +17,39 @@ telegramChatId = "telegramChatId"  # Your telegram chat id
 telegramBotApi = "https://api.telegram.org"
 
 
-class HiddenPrints:
-    def __enter__(self):
-        self._original_stdout = sys.stdout
-        sys.stdout = open(os.devnull, 'w')
+def tcp_ping(host, port, timeout=3, attempts=3):
+    """
+    尝试连接指定的主机和端口多次，如果在任何尝试中连接成功，则返回True，否则返回False。
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        sys.stdout.close()
-        sys.stdout = self._original_stdout
-
-
-def check_gfw(serverName, port):
-    ping = Ping(serverName, port, 1)
-    try:
-        with HiddenPrints():
-            ping.ping(4)
-    except Exception as e:
-        print(str(e)+"\nplease check your server name and port")
-    rate = Ping._success_rate(ping)
-    # 根据丢包率判断是否被墙
-    if float(rate) > 0:
-        return True
+    参数:
+    - host: 目标主机的IP地址或主机名
+    - port: 目标端口号
+    - timeout: 连接超时时间（秒）
+    - attempts: 尝试连接的次数
+    """
+    for attempt in range(1, attempts + 1):
+        try:
+            print(f"Attempt {attempt} of {attempts}")
+            # 创建一个socket对象
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(timeout)
+            # 尝试连接
+            start_time = time.time()
+            result = sock.connect_ex((host, port))
+            end_time = time.time()
+            # 关闭socket
+            sock.close()
+            
+            if result == 0:
+                print(f"Connected to {host} on port {port} (time={end_time - start_time:.2f}s)")
+                return True
+            else:
+                print(f"Failed to connect to {host} on port {port}")
+        except socket.error as e:
+            print(f"Socket error: {e}")
+        time.sleep(1)  # 等待1秒再次尝试
     return False
+
 
 
 # 用aws静态ip名称获取ip
@@ -112,7 +122,7 @@ if __name__ == "__main__":
             print("get ip failed")
             time.sleep(roundTime)
             continue
-        if check_gfw(ip, port):
+        if tcp_ping(ip, port):
             print("aws is ok")
         else:
             print("aws is not ok, changing ip...")
